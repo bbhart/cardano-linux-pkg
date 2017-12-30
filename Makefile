@@ -26,8 +26,8 @@ TOOLS = tools/bin/jenga tools/bin/mafia
 results/Daedalus-linux-x64/LICENSE : source/daedalus/release/linux-x64/Daedalus-linux-x64/LICENSE
 	cp -r source/daedalus/release/linux-x64/Daedalus-linux-x64 $(shell dirname $@)
 
-source/daedalus//release/linux-x64/Daedalus-linux-x64/LICENSE : source/daedalus/node_modules/tar/LICENSE
-	(cd source/daedalus && npm run package -- --icon $(PWD)/results/Resources/icons/256x256.png)
+source/daedalus/release/linux-x64/Daedalus-linux-x64/LICENSE : source/daedalus/node_modules/tar/LICENSE
+	(cd source/daedalus && npm run package --icon source/daedalus/installers/icons/256x256.png)
 
 source/daedalus/node_modules/tar/LICENSE : tools/bin/pkg source/daedalus/LICENSE
 	(cd source/daedalus && npm install)
@@ -44,19 +44,29 @@ source/daedalus/LICENSE :
 # Auxillary files.
 
 results/log-config-prod.yaml : source/cardano-sl/stack.yaml
-	cp -f source/cardano-sl/log-config-prod.yaml $@
+	cp -f $+ $@
 
 results/mainnet-genesis-dryrun-with-stakeholders.json : source/cardano-sl/stack.yaml
-	cp -f source/cardano-sl/lib/mainnet-genesis-dryrun-with-stakeholders.json $@
+	cp -f $+ $@
 
 results/mainnet-genesis.json : source/cardano-sl/stack.yaml
-	cp -f source/cardano-sl/lib/mainnet-genesis.json $@
+	cp -f $+ $@
 
 results/mainnet-staging-short-epoch-genesis.json : source/cardano-sl/stack.yaml
-	cp -f source/cardano-sl/lib/mainnet-staging-short-epoch-genesis.json $@
+	cp -f $+ $@
 
 results/configuration.yaml : source/cardano-sl/stack.yaml
-	cp -f source/cardano-sl/lib/configuration.yaml $@
+	cp -f $+ $@
+
+results/build-certificates-unix.sh : source/daedalus/installers/build-certificates-unix.sh
+	cp -f $+ $@
+
+results/wallet-topology.yaml : source/daedalus/installers/wallet-topology.yaml
+	cp -f $+ $@
+
+results/ca.conf : source/daedalus/installers/ca.conf
+	rm -f results/{ca,client,server}.conf
+	cp -f source/daedalus/installers/{ca,client,server}.conf results/
 
 #-------------------------------------------------------------------------------
 # Build cardano-launcher and cardano-node
