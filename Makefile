@@ -23,6 +23,13 @@ export MAFIA_PATH := $(PWD)/mafia
 TOOLS = tools/bin/jenga tools/bin/mafia
 
 
+#-------------------------------------------------------------------------------
+# Daedelus related stuff.
+
+results/run-daedalus.sh : scripts/run-daedalus.sh
+	cp -f $+ $@
+	chmod u+x $@
+
 results/Daedalus-linux-x64/LICENSE : source/daedalus/release/linux-x64/Daedalus-linux-x64/LICENSE
 	cp -r source/daedalus/release/linux-x64/Daedalus-linux-x64 $(shell dirname $@)
 
