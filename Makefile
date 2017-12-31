@@ -36,8 +36,14 @@ results/Daedalus-linux-x64/LICENSE : source/daedalus/release/linux-x64/Daedalus-
 source/daedalus/release/linux-x64/Daedalus-linux-x64/LICENSE : source/daedalus/node_modules/tar/LICENSE
 	(cd source/daedalus && npm run package --icon source/daedalus/installers/icons/256x256.png)
 
-source/daedalus/node_modules/tar/LICENSE : tools/bin/pkg source/daedalus/LICENSE
+source/daedalus/node_modules/tar/LICENSE : source/daedalus/node_modules/daedalus-client-api/README.md
+	(cd source/daedalus/node_modules/daedalus-client-api && npm install)
 	(cd source/daedalus && npm install)
+
+source/daedalus/node_modules/daedalus-client-api/README.md : source/daedalus/LICENSE
+	rm -rf source/daedalus/node_modules/daedalus-client-api
+	cp -r source/cardano-sl/daedalus source/daedalus/node_modules/daedalus-client-api
+	touch $@
 
 source/daedalus/LICENSE :
 	@if test -d source/daedalus ; then \
@@ -98,7 +104,7 @@ source/cardano-sl/.jenga : source/cardano-sl/stack.yaml $(TOOLS)
 	(cd source/cardano-sl/ && git add .gitmodules && git commit -m "Add submodules" -- . )
 	touch $@
 
-source/cardano-sl/stack.yaml : $(TOOLS)
+source/cardano-sl/stack.yaml :
 	@if test -d source/cardano-sl ; then \
 		(cd source/cardano-sl && git pull) ; \
 	else \
@@ -109,10 +115,6 @@ source/cardano-sl/stack.yaml : $(TOOLS)
 
 #-------------------------------------------------------------------------------
 # Install node and npm (included with node) in order to build Daedalus.
-
-tools/bin/pkg : tools/bin/node
-	npm install -g pkg
-	touch $@
 
 tools/bin/node : stamp/check-tarball
 	(cd source && tar xf $(PWD)/tarballs/node-v6.11.5.tar.gz)
