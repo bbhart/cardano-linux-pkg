@@ -19,7 +19,7 @@ However it is close.
 
 ### What's not working.
 
-Currently, when I run Daedalus, I get the following error in the electon Console:
+Currently, when I run Daedalus, I get the following error in the electron Console:
 ```
 Uncaught Error: Cannot find module "daedalus-client-api"
 ```
@@ -29,6 +29,27 @@ Uncaught Error: Cannot find module "daedalus-client-api"
 * Make it work (see above).
 * Add a proper installer ([appimage] maybe?).
 * Move per-wallet SSL certificate generation to `${CFGDIR}`.
+
+### Building it.
+
+First you should perform due diligence on this code. If you run this in a VM
+you don't really need to trust the code or the author. If you are going to run
+it on any machine which crypto currencies or crypto keys (SSH, GPG etc), you
+should probably inspect the the `Makefile` and the sources to mafia and jenga
+to make sure this code doesn't steal all your secrets.
+
+On most Linux system you will need to usual development tools plus the pre-requisites
+listed at the top of the `Makefile`. Once that is installed, just run:
+```
+make results/run-daedalus.sh results/Daedalus-linux-x64/LICENSE
+```
+This will take some time because it builds a lot of code, from source.
+
+Once done, you can run:
+```
+results/run-daedalus.sh
+```
+which will start the (currently non-functional) Daedalus GUI.
 
 
 
