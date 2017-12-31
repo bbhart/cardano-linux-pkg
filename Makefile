@@ -47,7 +47,7 @@ source/daedalus/node_modules/daedalus-client-api/README.md : source/daedalus/LIC
 
 source/daedalus/LICENSE : tools/bin/node
 	@if test -d source/daedalus ; then \
-		(cd source/daedalus && git pull) ; \
+		(cd source/daedalus && git pull --rebase) ; \
 	else \
 	    git clone https://github.com/input-output-hk/daedalus source/daedalus ; \
 	    fi
@@ -106,7 +106,7 @@ source/cardano-sl/.jenga : source/cardano-sl/stack.yaml $(TOOLS)
 
 source/cardano-sl/stack.yaml :
 	@if test -d source/cardano-sl ; then \
-		(cd source/cardano-sl && git pull) ; \
+		(cd source/cardano-sl && git pull --rebase) ; \
 	else \
 	    git clone https://github.com/input-output-hk/cardano-sl.git source/cardano-sl ; \
 	    fi
@@ -134,7 +134,7 @@ tarballs/node-v6.11.5.tar.gz :
 
 tools/bin/jenga : tools/bin/mafia
 	@if test -d source/jenga ; then \
-		(cd source/jenga && git pull) ; \
+		(cd source/jenga && git pull --rebase) ; \
 	else \
 	    git clone https://github.com/erikd/jenga source/jenga ; \
 	    fi
@@ -144,7 +144,7 @@ tools/bin/jenga : tools/bin/mafia
 tools/bin/mafia :
 	mkdir -p bin
 	@if test -d source/mafia ; then \
-		(cd source/mafia && git pull) ; \
+		(cd source/mafia && git pull --rebase) ; \
 	else \
 	    git clone https://github.com/haskell-mafia/mafia source/mafia ; \
 	    fi
