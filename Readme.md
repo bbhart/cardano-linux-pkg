@@ -24,8 +24,15 @@ Currently, when I run Daedalus, I get the following error in the electon Console
 Uncaught Error: Cannot find module "daedalus-client-api"
 ```
 
+### To do.
+
+* Make it work (see above).
+* Add a proper installer ([appimage] maybe?).
+* Move per-wallet SSL certificate generation to `${CFGDIR}`.
 
 
+
+[appimage]: https://appimage.org/
 [cardano]: https://github.com/input-output-hk/cardano-sl
 [daedalus]: https://github.com/input-output-hk/daedalus
 [jenga]: https://github.com/erikd/jenga
