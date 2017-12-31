@@ -38,14 +38,14 @@ source/daedalus/release/linux-x64/Daedalus-linux-x64/LICENSE : source/daedalus/n
 
 source/daedalus/node_modules/tar/LICENSE : source/daedalus/node_modules/daedalus-client-api/README.md
 	(cd source/daedalus/node_modules/daedalus-client-api && npm install)
-	(cd source/daedalus && npm install)
+	(cd source/daedalus && npm link && npm install)
 
 source/daedalus/node_modules/daedalus-client-api/README.md : source/daedalus/LICENSE
 	rm -rf source/daedalus/node_modules/daedalus-client-api
 	cp -r source/cardano-sl/daedalus source/daedalus/node_modules/daedalus-client-api
 	touch $@
 
-source/daedalus/LICENSE :
+source/daedalus/LICENSE : tools/bin/node
 	@if test -d source/daedalus ; then \
 		(cd source/daedalus && git pull) ; \
 	else \
