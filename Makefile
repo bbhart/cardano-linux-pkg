@@ -148,5 +148,6 @@ tools/bin/mafia :
 	else \
 	    git clone https://github.com/haskell-mafia/mafia source/mafia ; \
 	    fi
+	(cd source/mafia && git checkout topic/accept-lib)
 	(cd source/mafia && script/mafia build)
 	cp -f source/mafia/dist/build/mafia/mafia $@
