@@ -141,7 +141,7 @@ tools/bin/jenga : tools/bin/mafia
 	(cd source/jenga && mafia build)
 	cp -f source/jenga/dist/build/jenga/jenga $@
 
-tools/bin/mafia :
+tools/bin/mafia : stamp/cabal-update
 	mkdir -p bin
 	@if test -d source/mafia ; then \
 		(cd source/mafia && git pull --rebase) ; \
@@ -151,3 +151,8 @@ tools/bin/mafia :
 	(cd source/mafia && git checkout topic/accept-lib)
 	(cd source/mafia && script/mafia build)
 	cp -f source/mafia/dist/build/mafia/mafia $@
+
+# Update the local cabal data.
+stamp/cabal-update :
+	cabal update
+	touch $@
