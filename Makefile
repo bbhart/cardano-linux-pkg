@@ -22,6 +22,9 @@ export MAFIA_PATH := $(PWD)/mafia
 
 TOOLS = tools/bin/jenga tools/bin/mafia
 
+CARDANO_BRANCH = develop
+
+MAFIA_DROP_DEP = directory,binary-example,chat,latency
 
 #-------------------------------------------------------------------------------
 # Daedelus related stuff.
@@ -37,15 +40,15 @@ source/daedalus/release/linux-x64/Daedalus-linux-x64/LICENSE : source/daedalus/n
 	(cd source/daedalus && npm run package --icon source/daedalus/installers/icons/256x256.png)
 
 source/daedalus/node_modules/tar/LICENSE : source/daedalus/node_modules/daedalus-client-api/README.md
-	(cd source/daedalus/node_modules/daedalus-client-api && npm install)
 	(cd source/daedalus && npm link && npm install)
 
-source/daedalus/node_modules/daedalus-client-api/README.md : source/daedalus/LICENSE
+source/daedalus/node_modules/daedalus-client-api/README.md : stamp/daedalus-source stamp/daedalus-bridge
 	rm -rf source/daedalus/node_modules/daedalus-client-api
+	(cd source/daedalus && npm install)
 	cp -r source/cardano-sl/daedalus source/daedalus/node_modules/daedalus-client-api
 	touch $@
 
-source/daedalus/LICENSE : tools/bin/node
+stamp/daedalus-source : tools/bin/node
 	@if test -d source/daedalus ; then \
 		(cd source/daedalus && git pull --rebase) ; \
 	else \
@@ -84,6 +87,15 @@ results/ca.conf : source/daedalus/installers/ca.conf
 #-------------------------------------------------------------------------------
 # Build cardano-launcher and cardano-node
 
+stamp/daedalus-bridge : tools/bin/cardano-wallet-hs2purs
+	(cd source/cardano-sl && cardano-wallet-hs2purs)
+	(cd source/cardano-sl/daedalus && npm install)
+	touch $@
+
+tools/bin/cardano-wallet-hs2purs : source/cardano-sl/.jenga $(TOOLS)
+	(cd source/cardano-sl/wallet && mafia build cardano-wallet-hs2purs)
+	(cp -f source/cardano-sl/wallet/dist/build/cardano-wallet-hs2purs/cardano-wallet-hs2purs $@)
+
 results/cardano-launcher : source/cardano-sl/.jenga $(TOOLS)
 	mkdir -p results
 	(cd source/cardano-sl/tools && mafia build cardano-launcher)
@@ -98,10 +110,10 @@ source/cardano-sl/.jenga : source/cardano-sl/stack.yaml $(TOOLS)
 	@if test -f $@ ; then \
 		(cd source/cardano-sl/ && git pull --rebase && jenga update) ; \
 	else \
-		(cd source/cardano-sl/ && git pull --rebase && jenga init -m submods -d directory) ; \
+		(cd source/cardano-sl/ && git pull --rebase && jenga init -m submods -d ${MAFIA_DROP_DEP}) ; \
 		fi
-	(cd source/cardano-sl/ && git reset origin/develop)
-	(cd source/cardano-sl/ && git add .gitmodules && git commit -m "Add submodules" -- . )
+	(cd source/cardano-sl/ && git reset origin/$(CARDANO_BRANCH))
+	(cd source/cardano-sl/ && git add .gitmodules submods && git commit -m "Add submodules" -- . )
 	touch $@
 
 source/cardano-sl/stack.yaml :
@@ -110,7 +122,7 @@ source/cardano-sl/stack.yaml :
 	else \
 	    git clone https://github.com/input-output-hk/cardano-sl.git source/cardano-sl ; \
 	    fi
-	(cd source/cardano-sl/ && git checkout develop)
+	(cd source/cardano-sl/ && git checkout $(CARDANO_BRANCH))
 	touch $@
 
 #-------------------------------------------------------------------------------
