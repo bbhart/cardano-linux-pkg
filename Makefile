@@ -26,6 +26,9 @@ CARDANO_BRANCH = develop
 
 MAFIA_DROP_DEP = directory,binary-example,chat,latency
 
+all : results/cardano-launcher results/cardano-node results/run-daedalus.sh \
+		results/Daedalus-linux-x64/Daedalus $(AUX_TARGETS)
+
 #-------------------------------------------------------------------------------
 # Daedelus related stuff.
 
@@ -33,16 +36,13 @@ results/run-daedalus.sh : scripts/run-daedalus.sh
 	cp -f $+ $@
 	chmod u+x $@
 
-results/Daedalus-linux-x64/LICENSE : source/daedalus/release/linux-x64/Daedalus-linux-x64/LICENSE
+results/Daedalus-linux-x64/Daedalus : source/daedalus/release/linux-x64/Daedalus-linux-x64/Daedalus
 	cp -r source/daedalus/release/linux-x64/Daedalus-linux-x64 $(shell dirname $@)
 
-source/daedalus/release/linux-x64/Daedalus-linux-x64/LICENSE : source/daedalus/node_modules/tar/LICENSE
+source/daedalus/release/linux-x64/Daedalus-linux-x64/Daedalus : source/daedalus/node_modules/daedalus-client-api/package.json
 	(cd source/daedalus && npm run package --icon source/daedalus/installers/icons/256x256.png)
 
-source/daedalus/node_modules/tar/LICENSE : source/daedalus/node_modules/daedalus-client-api/README.md
-	(cd source/daedalus && npm link && npm install)
-
-source/daedalus/node_modules/daedalus-client-api/README.md : stamp/daedalus-source stamp/daedalus-bridge
+source/daedalus/node_modules/daedalus-client-api/package.json : stamp/daedalus-source stamp/daedalus-bridge
 	rm -rf source/daedalus/node_modules/daedalus-client-api
 	(cd source/daedalus && npm install)
 	cp -r source/cardano-sl/daedalus source/daedalus/node_modules/daedalus-client-api
@@ -59,19 +59,31 @@ stamp/daedalus-source : tools/bin/node
 #-------------------------------------------------------------------------------
 # Auxillary files.
 
-results/log-config-prod.yaml : source/cardano-sl/stack.yaml
+clean-aux :
+	rm -f $(AUX_TARGETS)
+
+install-aux :
+	make $(AUX_TARGETS)
+
+AUX_TARGETS = \
+	results/log-config-prod.yaml results/mainnet-genesis-dryrun-with-stakeholders.json \
+	results/mainnet-genesis.json results/mainnet-staging-short-epoch-genesis.json \
+	results/configuration.yaml results/build-certificates-unix.sh results/wallet-topology.yaml \
+	results/ca.conf results/client.conf results/server.conf
+
+results/log-config-prod.yaml : source/cardano-sl/log-config-prod.yaml
 	cp -f $+ $@
 
-results/mainnet-genesis-dryrun-with-stakeholders.json : source/cardano-sl/stack.yaml
+results/mainnet-genesis-dryrun-with-stakeholders.json : source/cardano-sl/lib/mainnet-genesis-dryrun-with-stakeholders.json
 	cp -f $+ $@
 
-results/mainnet-genesis.json : source/cardano-sl/stack.yaml
+results/mainnet-genesis.json : source/cardano-sl/lib/mainnet-genesis.json
 	cp -f $+ $@
 
-results/mainnet-staging-short-epoch-genesis.json : source/cardano-sl/stack.yaml
+results/mainnet-staging-short-epoch-genesis.json : source/cardano-sl/lib/mainnet-staging-short-epoch-genesis.json
 	cp -f $+ $@
 
-results/configuration.yaml : source/cardano-sl/stack.yaml
+results/configuration.yaml : source/cardano-sl/lib/configuration.yaml
 	cp -f $+ $@
 
 results/build-certificates-unix.sh : source/daedalus/installers/build-certificates-unix.sh
@@ -81,11 +93,16 @@ results/wallet-topology.yaml : source/daedalus/installers/wallet-topology.yaml
 	cp -f $+ $@
 
 results/ca.conf : source/daedalus/installers/ca.conf
-	rm -f results/{ca,client,server}.conf
-	cp -f source/daedalus/installers/{ca,client,server}.conf results/
+	cp -f $+ $@
+
+results/client.conf : source/daedalus/installers/client.conf
+	cp -f $+ $@
+
+results/server.conf : source/daedalus/installers/server.conf
+	cp -f $+ $@
 
 #-------------------------------------------------------------------------------
-# Build cardano-launcher and cardano-node
+# Build cardano-launcher, cardano-node and daedalus bridge.
 
 stamp/daedalus-bridge : tools/bin/cardano-wallet-hs2purs
 	(cd source/cardano-sl && cardano-wallet-hs2purs)
