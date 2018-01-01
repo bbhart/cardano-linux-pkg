@@ -183,5 +183,6 @@ tools/bin/mafia : stamp/cabal-update
 
 # Update the local cabal data.
 stamp/cabal-update :
+	mkdir -p stamp
 	cabal update
 	touch $@
