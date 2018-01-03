@@ -3,7 +3,7 @@
 #     cabal-install-1.24
 #     g++
 #     gcc
-#     ghc-8.0
+#     ghc-8.0.2
 #     liblzma-dev
 #     librocksdb-dev
 #     libsnappy-dev
@@ -22,17 +22,21 @@ export MAFIA_PATH := $(PWD)/mafia
 
 TOOLS = tools/bin/jenga tools/bin/mafia
 
-CARDANO_BRANCH = develop
+# 38b63f52313474f996457315cdba05e9cd78fead
+CARDANO_VERSION ?= develop
+DAEDALUS_VERSION ?= master
 
 MAFIA_DROP_DEP = directory,binary-example,chat,latency
 
 all : results/cardano-launcher results/cardano-node results/run-daedalus.sh \
-		results/Daedalus-linux-x64/Daedalus $(AUX_TARGETS)
+		results/Daedalus-linux-x64/Daedalus
+	make install-aux
 
 #-------------------------------------------------------------------------------
 # Daedelus related stuff.
 
-results/run-daedalus.sh : scripts/run-daedalus.sh
+results/run-daedalus.sh : resources/run-daedalus.sh
+	mkdir -p results
 	cp -f $+ $@
 	chmod u+x $@
 
@@ -42,18 +46,15 @@ results/Daedalus-linux-x64/Daedalus : source/daedalus/release/linux-x64/Daedalus
 source/daedalus/release/linux-x64/Daedalus-linux-x64/Daedalus : source/daedalus/node_modules/daedalus-client-api/package.json
 	(cd source/daedalus && npm run package --icon source/daedalus/installers/icons/256x256.png)
 
-source/daedalus/node_modules/daedalus-client-api/package.json : stamp/daedalus-source stamp/daedalus-bridge
+source/daedalus/node_modules/daedalus-client-api/package.json : stamp/daedalus-source stamp/daedalus-bridge tools/bin/node
 	rm -rf source/daedalus/node_modules/daedalus-client-api
-	(cd source/daedalus && npm install)
+	(cd source/daedalus && npm link && npm install)
 	cp -r source/cardano-sl/daedalus source/daedalus/node_modules/daedalus-client-api
 	touch $@
 
-stamp/daedalus-source : tools/bin/node
-	@if test -d source/daedalus ; then \
-		(cd source/daedalus && git pull --rebase) ; \
-	else \
-	    git clone https://github.com/input-output-hk/daedalus source/daedalus ; \
-	    fi
+stamp/daedalus-source :
+	mkdir -p stamp
+	scripts/git-sync-repo.sh https://github.com/input-output-hk/daedalus source/daedalus
 	touch $@
 
 #-------------------------------------------------------------------------------
@@ -63,6 +64,7 @@ clean-aux :
 	rm -f $(AUX_TARGETS)
 
 install-aux :
+	mkdir -p results
 	make $(AUX_TARGETS)
 
 AUX_TARGETS = \
@@ -104,42 +106,33 @@ results/server.conf : source/daedalus/installers/server.conf
 #-------------------------------------------------------------------------------
 # Build cardano-launcher, cardano-node and daedalus bridge.
 
-stamp/daedalus-bridge : tools/bin/cardano-wallet-hs2purs
+stamp/daedalus-bridge : tools/bin/cardano-wallet-hs2purs tools/bin/node
 	(cd source/cardano-sl && cardano-wallet-hs2purs)
 	(cd source/cardano-sl/daedalus && npm install)
 	touch $@
 
 tools/bin/cardano-wallet-hs2purs : source/cardano-sl/.jenga $(TOOLS)
+	mkdir -p tools/bin/
 	(cd source/cardano-sl/wallet && mafia build cardano-wallet-hs2purs)
 	(cp -f source/cardano-sl/wallet/dist/build/cardano-wallet-hs2purs/cardano-wallet-hs2purs $@)
 
 results/cardano-launcher : source/cardano-sl/.jenga $(TOOLS)
-	mkdir -p results
 	(cd source/cardano-sl/tools && mafia build cardano-launcher)
 	cp -f source/cardano-sl/tools/dist/build/cardano-launcher/cardano-launcher $@
 
 results/cardano-node : source/cardano-sl/.jenga $(TOOLS)
-	mkdir -p results
 	(cd source/cardano-sl/wallet && mafia build cardano-node)
 	cp -f source/cardano-sl/wallet/dist/build/cardano-node/cardano-node $@
 
-source/cardano-sl/.jenga : source/cardano-sl/stack.yaml $(TOOLS)
-	@if test -f $@ ; then \
-		(cd source/cardano-sl/ && git pull --rebase && jenga update) ; \
-	else \
-		(cd source/cardano-sl/ && git pull --rebase && jenga init -m submods -d ${MAFIA_DROP_DEP}) ; \
-		fi
-	(cd source/cardano-sl/ && git reset origin/$(CARDANO_BRANCH))
+source/cardano-sl/.jenga : stamp/cardano-source $(TOOLS)
+	(cd source/cardano-sl/ && git checkout $(CARDANO_VERSION))
+	scripts/jenga-update.sh source/cardano-sl/ submods ${MAFIA_DROP_DEP}
 	(cd source/cardano-sl/ && git add .gitmodules submods && git commit -m "Add submodules" -- . )
 	touch $@
 
-source/cardano-sl/stack.yaml :
-	@if test -d source/cardano-sl ; then \
-		(cd source/cardano-sl && git pull --rebase) ; \
-	else \
-	    git clone https://github.com/input-output-hk/cardano-sl.git source/cardano-sl ; \
-	    fi
-	(cd source/cardano-sl/ && git checkout $(CARDANO_BRANCH))
+stamp/cardano-source :
+	mkdir -p stamp
+	scripts/git-sync-repo.sh https://github.com/input-output-hk/cardano-sl.git source/cardano-sl
 	touch $@
 
 #-------------------------------------------------------------------------------
@@ -155,34 +148,26 @@ stamp/check-tarball : tarballs/node-v6.11.5.tar.gz
 	touch $@
 
 tarballs/node-v6.11.5.tar.gz :
-	mkdir -p tarballs
 	curl -o $@ https://nodejs.org/dist/v6.11.5/node-v6.11.5.tar.gz
 
 # ------------------------------------------------------------------------------
 # Install Haskell tools mafia and jenga from source.
 
 tools/bin/jenga : tools/bin/mafia
-	@if test -d source/jenga ; then \
-		(cd source/jenga && git pull --rebase) ; \
-	else \
-	    git clone https://github.com/erikd/jenga source/jenga ; \
-	    fi
+	mkdir -p tools/bin/
+	scripts/git-sync-repo.sh  https://github.com/erikd/jenga source/jenga
 	(cd source/jenga && mafia build)
 	cp -f source/jenga/dist/build/jenga/jenga $@
 
 tools/bin/mafia : stamp/cabal-update
-	mkdir -p bin
-	@if test -d source/mafia ; then \
-		(cd source/mafia && git pull --rebase) ; \
-	else \
-	    git clone https://github.com/haskell-mafia/mafia source/mafia ; \
-	    fi
+	mkdir -p tools/bin/
+	scripts/git-sync-repo.sh https://github.com/haskell-mafia/mafia source/mafia
 	(cd source/mafia && git checkout topic/accept-lib)
 	(cd source/mafia && script/mafia build)
 	cp -f source/mafia/dist/build/mafia/mafia $@
 
 # Update the local cabal data.
 stamp/cabal-update :
-	mkdir -p stamp
+	mkdir -p home results stamp tarballs tools/bin
 	cabal update
 	touch $@
