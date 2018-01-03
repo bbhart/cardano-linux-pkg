@@ -4,7 +4,8 @@ cd $(dirname $0)
 
 if test ! -f tls/ca/ca.crt ; then
   echo "SSL certificates not generated yet."
-  echo "You need to cd to $(pwd) and run 'bash build-certificates-unix.sh'."
+  echo "You need to run the following command (including parentheses):"
+  echo "    (cd $(pwd) && bash build-certificates-unix.sh)"
   exit 1
   fi
 
