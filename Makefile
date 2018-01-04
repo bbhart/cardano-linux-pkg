@@ -16,7 +16,7 @@ PWD := $(shell pwd)
 export HOME = $(PWD)/home
 
 # Want the local path to come before global paths.
-export PATH := $(PWD)/tools/bin:/usr/bin:/bin
+export PATH := $(PWD)/tools/bin:$(PATH)
 
 export MAFIA_PATH := $(PWD)/mafia
 
