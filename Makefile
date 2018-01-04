@@ -18,9 +18,9 @@ export HOME = $(PWD)/home
 # Want the local path to come before global paths.
 export PATH := $(PWD)/tools/bin:$(PATH)
 
-export MAFIA_PATH := $(PWD)/mafia
+export MAFIA_HOME := $(HOME)/mafia
 
-TOOLS = tools/bin/jenga tools/bin/mafia
+TOOLS = tools/bin/autoexporter tools/bin/jenga tools/bin/mafia tools/bin/markdown-unlit
 
 # 38b63f52313474f996457315cdba05e9cd78fead
 CARDANO_VERSION ?= develop
@@ -31,6 +31,10 @@ MAFIA_DROP_DEP = directory,binary-example,chat,latency
 all : results/cardano-launcher results/cardano-node results/run-daedalus.sh \
 		results/Daedalus-linux-x64/Daedalus
 	make install-aux
+
+purge :
+	# This is a really big hammer. Use sparingly.
+	rm -rf  bin/ home/ results/ source/ stamp/ tools/
 
 #-------------------------------------------------------------------------------
 # Daedelus related stuff.
@@ -153,7 +157,16 @@ tarballs/node-v6.11.5.tar.gz :
 	curl -o $@ https://nodejs.org/dist/v6.11.5/node-v6.11.5.tar.gz
 
 # ------------------------------------------------------------------------------
-# Install Haskell tools mafia and jenga from source.
+# Install Haskell tools jenga and mafia from source.
+
+tools/bin/autoexporter : tools/bin/mafia
+	# Mafia nees to
+	mafia install autoexporter
+	(cp $(MAFIA_HOME)/bin/autoexporter/bin/autoexporter $@)
+
+tools/bin/markdown-unlit : tools/bin/mafia
+	mafia install markdown-unlit
+	(cp $(MAFIA_HOME)/bin/markdown-unlit/bin/markdown-unlit $@)
 
 tools/bin/jenga : tools/bin/mafia
 	mkdir -p tools/bin/
