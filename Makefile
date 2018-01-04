@@ -117,10 +117,12 @@ tools/bin/cardano-wallet-hs2purs : source/cardano-sl/.jenga $(TOOLS)
 	(cp -f source/cardano-sl/wallet/dist/build/cardano-wallet-hs2purs/cardano-wallet-hs2purs $@)
 
 results/cardano-launcher : source/cardano-sl/.jenga $(TOOLS)
+	scripts/ghc-version-check.sh
 	(cd source/cardano-sl/tools && mafia build cardano-launcher)
 	cp -f source/cardano-sl/tools/dist/build/cardano-launcher/cardano-launcher $@
 
 results/cardano-node : source/cardano-sl/.jenga $(TOOLS)
+	scripts/ghc-version-check.sh
 	(cd source/cardano-sl/wallet && mafia build cardano-node)
 	cp -f source/cardano-sl/wallet/dist/build/cardano-node/cardano-node $@
 
@@ -168,6 +170,8 @@ tools/bin/mafia : stamp/cabal-update
 
 # Update the local cabal data.
 stamp/cabal-update :
+	scripts/ghc-version-check.sh
+	scripts/cabal-version-check.sh
 	mkdir -p home results stamp tarballs tools/bin
 	cabal update
 	touch $@
