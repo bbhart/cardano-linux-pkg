@@ -36,6 +36,12 @@ purge :
 	# This is a really big hammer. Use sparingly.
 	rm -rf  bin/ home/ results/ source/ stamp/ tools/
 
+purge-cardano :
+	rm -rf source/cardano-sl/ stamp/cardano-source
+
+purge-daedalus :
+	rm -rf source/daedalus stamp/daedalus-source
+
 #-------------------------------------------------------------------------------
 # Daedelus related stuff.
 
@@ -160,7 +166,6 @@ tarballs/node-v6.11.5.tar.gz :
 # Install Haskell tools jenga and mafia from source.
 
 tools/bin/autoexporter : tools/bin/mafia
-	# Mafia nees to
 	mafia install autoexporter
 	(cp $(MAFIA_HOME)/bin/autoexporter/bin/autoexporter $@)
 
