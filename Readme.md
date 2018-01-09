@@ -3,11 +3,7 @@
 This is a Makefile that should be able to build [cardano] and the [daedalus]
 wallet on any Linux system.
 
-The current state of this code is that
-
-# it has worked once!!!
-
-Hopefully others can repeat my success.
+This code should as is as long as you have the required dependencies installed.
 
 ### What the build script does.
 
