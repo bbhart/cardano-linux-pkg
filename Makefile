@@ -9,6 +9,8 @@
 #     libsnappy-dev
 #     libssl-dev
 #     make
+#     python2.7
+
 
 DATE = $(shell date)
 PWD := $(shell pwd)
