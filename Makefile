@@ -24,8 +24,7 @@ export MAFIA_HOME := $(HOME)/mafia
 
 TOOLS = tools/bin/autoexporter tools/bin/jenga tools/bin/mafia tools/bin/markdown-unlit
 
-# 38b63f52313474f996457315cdba05e9cd78fead
-CARDANO_VERSION ?= develop
+CARDANO_VERSION ?= a8d7afd4afd00952d5af959503e1c5e4725594d6
 DAEDALUS_VERSION ?= master
 
 MAFIA_DROP_DEP = directory,binary-example,chat,latency
