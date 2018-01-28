@@ -101,6 +101,7 @@ results/configuration.yaml : source/cardano-sl/lib/configuration.yaml
 
 results/build-certificates-unix.sh : source/daedalus/installers/build-certificates-unix.sh
 	cp -f $+ $@
+	chmod a+rx $@
 
 results/wallet-topology.yaml : source/daedalus/installers/wallet-topology.yaml
 	cp -f $+ $@
