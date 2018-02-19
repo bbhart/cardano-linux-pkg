@@ -34,15 +34,15 @@ all : results/cardano-launcher results/cardano-node results/run-daedalus.sh \
 	make install-aux
 
 ubuntu16:
-	sudo add-apt-repository -y ppa:hvr/ghc
-	sudo apt-get update
-	sudo apt-get install -y ghc-8.0.2 && export PATH=/opt/ghc/bin:$PATH 
+	sudo apt-get install -y liblzma-dev librocksdb-dev libsnappy-dev libssl-dev python2.7 zlib1g-dev
+	sudo add-apt-repository -y ppa:hvr/ghc && apt-get update
+	sudo apt-get install -y ghc-8.0.2
+	
 	curl -O https://hackage.haskell.org/package/cabal-install-1.24.0.2/cabal-install-1.24.0.2.tar.gz
-	tar -zxvf cabal-install-1.24.0.2
-	EXTRA_CONFIGURE_OPTS="" ./bootstrap.sh
-	sudo cp ~/.cabal/bin/cabal /usr/local/bin
+	tar -zxvf cabal-install-1.24.0.2.tar.gz
+	cd cabal-install-1.24.0.2 && (EXTRA_CONFIGURE_OPTS="" ./bootstrap.sh)
+	sudo cp cabal-install-1.24.0.2/.cabal/bin/cabal /usr/local/bin
 	cabal update
-	sudo apt-get install -y liblzma-dev librocksdb-dev libsnappy-dev libssl-dev python2.7
 
 purge :
 	# This is a really big hammer. Use sparingly.
